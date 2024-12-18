@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FarmerRepository } from 'src/infra/db/farmerRepository';
+import { FarmerRepository } from '../infra/db/farmerRepository';
 
 @Injectable()
 export class ValidateDuplicateDocument {

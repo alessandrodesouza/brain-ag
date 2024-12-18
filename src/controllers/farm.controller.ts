@@ -10,11 +10,11 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { FarmCreateError } from 'src/model/errors/farmCreateError';
-import { FarmerNotFoundError } from 'src/model/errors/farmerNotFoundError';
-import { FarmNotFoundError } from 'src/model/errors/farmNotFoundError';
-import { FarmUpdateError } from 'src/model/errors/farmUpdateError';
-import { CreateFarmParams, FarmService } from 'src/services/farm.service';
+import { FarmCreateError } from '../model/errors/farmCreateError';
+import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
+import { FarmNotFoundError } from '../model/errors/farmNotFoundError';
+import { FarmUpdateError } from '../model/errors/farmUpdateError';
+import { CreateFarmParams, FarmService } from '../services/farm.service';
 
 @Controller('farm')
 export class FarmController {

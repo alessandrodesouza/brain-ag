@@ -10,12 +10,12 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { FarmerCreateError } from 'src/model/errors/farmerCreateError';
-import { FarmerDeleteError } from 'src/model/errors/farmerDeleteError';
-import { FarmerDuplicateDocumentError } from 'src/model/errors/farmerDuplicateDocumentError';
-import { FarmerNotFoundError } from 'src/model/errors/farmerNotFoundError';
-import { FarmerUpdateError } from 'src/model/errors/farmerUpdateError';
-import { FarmerService } from 'src/services/farmer.service';
+import { FarmerCreateError } from '../model/errors/farmerCreateError';
+import { FarmerDeleteError } from '../model/errors/farmerDeleteError';
+import { FarmerDuplicateDocumentError } from '../model/errors/farmerDuplicateDocumentError';
+import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
+import { FarmerUpdateError } from '../model/errors/farmerUpdateError';
+import { FarmerService } from '../services/farmer.service';
 
 @Controller('farmer')
 export class FarmerController {
@@ -131,7 +131,7 @@ export class FarmerController {
 
       if (error instanceof FarmerDeleteError) {
         return res
-          .status(HttpStatus.NOT_FOUND)
+          .status(HttpStatus.BAD_REQUEST)
           .json({ message: error.message, field: error.field });
       }
 

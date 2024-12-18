@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FarmerRepository } from 'src/infra/db/farmerRepository';
-import { FarmRepository } from 'src/infra/db/farmRepository';
-import { FarmerDeleteError } from 'src/model/errors/farmerDeleteError';
-import { FarmerDuplicateDocumentError } from 'src/model/errors/farmerDuplicateDocumentError';
-import { FarmerNotFoundError } from 'src/model/errors/farmerNotFoundError';
-import { Farmer } from 'src/model/farmer';
-import { ValidateDuplicateDocument } from 'src/model/validateDuplicatedDocument';
+import { FarmerRepository } from '../infra/db/farmerRepository';
+import { FarmRepository } from '../infra/db/farmRepository';
+import { FarmerDeleteError } from '../model/errors/farmerDeleteError';
+import { FarmerDuplicateDocumentError } from '../model/errors/farmerDuplicateDocumentError';
+import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
+import { Farmer } from '../model/farmer';
+import { ValidateDuplicateDocument } from '../model/validateDuplicatedDocument';
 
 @Injectable()
 export class FarmerService {

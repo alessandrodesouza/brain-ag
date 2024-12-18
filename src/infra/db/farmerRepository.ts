@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Farmer } from 'src/model/farmer';
-import { IFarmerRepository } from 'src/model/repositories/farmerRepository';
-import { PrismaService } from 'src/prisma.service';
+import { Farmer } from '../../model/farmer';
+import { IFarmerRepository } from '../../model/repositories/farmerRepository';
+import { PrismaService } from '../../prisma.service';
 
 @Injectable()
 export class FarmerRepository implements IFarmerRepository {

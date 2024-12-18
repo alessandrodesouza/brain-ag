@@ -69,7 +69,7 @@ describe('Given the need to update a farmer', () => {
     });
   });
 
-  describe('When valid parameters are provided', () => {
+  describe('When invalid parameters are provided', () => {
     it('Should return the correct error when the document is invalid', () => {
       const farmer = Farmer.create({ document, name });
 
@@ -84,8 +84,12 @@ describe('Given the need to update a farmer', () => {
     it('Should return the correct error when the name is invalid', () => {
       const farmer = Farmer.create({ document, name });
 
-      expect(() => farmer.update({ name: '' })).toThrow('farmer.invalid.name');
-      expect(() => farmer.update({ name: '' })).toThrow(FarmerUpdateError);
+      expect(() => farmer.update({ name: 123 as any })).toThrow(
+        'farmer.invalid.name',
+      );
+      expect(() => farmer.update({ name: 123 as any })).toThrow(
+        FarmerUpdateError,
+      );
     });
   });
 });

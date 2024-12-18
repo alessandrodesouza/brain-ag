@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { FarmerRepository } from 'src/infra/db/farmerRepository';
-import { FarmRepository } from 'src/infra/db/farmRepository';
-import { FarmerNotFoundError } from 'src/model/errors/farmerNotFoundError';
-import { FarmNotFoundError } from 'src/model/errors/farmNotFoundError';
-import { Crop, Farm } from 'src/model/farm';
-import { Farmer } from 'src/model/farmer';
+import { FarmerRepository } from '../infra/db/farmerRepository';
+import { FarmRepository } from '../infra/db/farmRepository';
+import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
+import { FarmNotFoundError } from '../model/errors/farmNotFoundError';
+import { Crop, Farm } from '../model/farm';
+import { Farmer } from '../model/farmer';
 
 export type CreateFarmParams = {
   name: string;
