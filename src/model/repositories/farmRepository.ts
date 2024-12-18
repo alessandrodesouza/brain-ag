@@ -1,10 +1,8 @@
-import { Farmer } from '../farmer';
+import { Farm } from '../farm';
 
 export interface IFarmRepository {
-  createFarmer(farm: Farmer): Promise<string>;
-  updateFarmer(farm: Farmer): Promise<void>;
-  getFarmerById(id: string): Promise<Farmer>;
-  getFarmerByDocument(document: string): Promise<Farmer>;
-  getOtherFarmerByDocument(id: string, document: string): Promise<Farmer>;
-  deleteFarmerById(id: string): Promise<void>;
+  createFarm(farm: Farm): Promise<string>;
+  getFarmById(id: string): Promise<Farm>;
+  getTotalFarmsByFarmerId(farmerId: string): Promise<number>;
+  deleteFarmById(id: string): Promise<void>;
 }

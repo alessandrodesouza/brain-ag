@@ -5,7 +5,7 @@ import { FarmerCreateError } from './errors/farmerCreateError';
 import { FarmerParserError } from './errors/farmerParserError';
 import { FarmerUpdateError } from './errors/farmerUpdateError';
 
-const farmer = z
+export const farmer = z
   .object({
     id: z
       .string({ message: 'farmer.invalid.id' })

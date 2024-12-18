@@ -4,16 +4,21 @@ import { AppService } from './app.service';
 import { FarmerService } from './services/farmer.service';
 import { FarmerController } from './controllers/farmer.controller';
 import { PrismaService } from './prisma.service';
-import { FarmerRepository } from './infra/db/farmRepository';
+import { FarmerRepository } from './infra/db/farmerRepository';
 import { ValidateDuplicateDocument } from './model/validateDuplicatedDocument';
+import { FarmService } from './services/farm.service';
+import { FarmRepository } from './infra/db/farmRepository';
+import { FarmController } from './controllers/farm.controller';
 
 @Module({
   imports: [],
-  controllers: [AppController, FarmerController],
+  controllers: [AppController, FarmerController, FarmController],
   providers: [
     AppService,
-    FarmerService,
     PrismaService,
+    FarmService,
+    FarmerService,
+    FarmRepository,
     FarmerRepository,
     ValidateDuplicateDocument,
   ],

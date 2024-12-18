@@ -10,37 +10,38 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { FarmerCreateError } from 'src/model/errors/farmerCreateError';
-import { FarmerDeleteError } from 'src/model/errors/farmerDeleteError';
-import { FarmerDuplicateDocumentError } from 'src/model/errors/farmerDuplicateDocumentError';
+import { FarmCreateError } from 'src/model/errors/farmCreateError';
 import { FarmerNotFoundError } from 'src/model/errors/farmerNotFoundError';
-import { FarmerUpdateError } from 'src/model/errors/farmerUpdateError';
-import { FarmerService } from 'src/services/farmer.service';
+import { FarmNotFoundError } from 'src/model/errors/farmNotFoundError';
+import { FarmUpdateError } from 'src/model/errors/farmUpdateError';
+import { CreateFarmParams, FarmService } from 'src/services/farm.service';
 
-@Controller('farmer')
-export class FarmerController {
-  constructor(private readonly farmarService: FarmerService) {}
+@Controller('farm')
+export class FarmController {
+  constructor(private readonly farmService: FarmService) {}
 
   @Post()
-  async postFarmer(
-    @Body() params: { document: string; name: string },
-    @Res() res: Response,
-  ) {
+  async postFarm(@Body() params: CreateFarmParams, @Res() res: Response) {
     try {
-      const id = await this.farmarService.createFarmer({
-        document: params.document,
+      const id = await this.farmService.createFarm({
         name: params.name,
+        city: params.city,
+        state: params.state,
+        totalArea: params.totalArea,
+        vegetationArea: params.vegetationArea,
+        farmerId: params.farmerId,
+        crops: params.crops,
       });
 
       return res.status(HttpStatus.CREATED).json({ id });
     } catch (error) {
-      if (error instanceof FarmerCreateError) {
+      if (error instanceof FarmerNotFoundError) {
         return res
-          .status(HttpStatus.BAD_REQUEST)
+          .status(HttpStatus.NOT_FOUND)
           .json({ message: error.message, field: error.field });
       }
 
-      if (error instanceof FarmerDuplicateDocumentError) {
+      if (error instanceof FarmCreateError) {
         return res
           .status(HttpStatus.BAD_REQUEST)
           .json({ message: error.message, field: error.field });
@@ -53,21 +54,18 @@ export class FarmerController {
     }
   }
 
-  @Get('/:idOrDocument')
-  async getFarmer(
-    @Param('idOrDocument') idOrDocument: string,
-    @Res() res: Response,
-  ) {
+  @Get('/:id')
+  async getFarm(@Param('id') id: string, @Res() res: Response) {
     try {
-      const farmer = await this.farmarService.getFarmer({
-        idOrDocument: idOrDocument,
+      const farm = await this.farmService.getFarm({
+        id,
       });
 
-      if (!farmer) {
+      if (!farm) {
         return res.status(HttpStatus.NOT_FOUND).end();
       }
 
-      return res.status(HttpStatus.OK).json(farmer.toJSON());
+      return res.status(HttpStatus.OK).json(farm.toJSON());
     } catch (error) {
       console.error(error);
       return res
@@ -83,27 +81,23 @@ export class FarmerController {
     @Res() res: Response,
   ) {
     try {
-      await this.farmarService.updateFarmer({
-        id,
-        document: params.document,
-        name: params.name,
-      });
+      await this.farmService.updateFarm({ ...params, id });
 
       return res.status(HttpStatus.OK).end();
     } catch (error) {
+      if (error instanceof FarmNotFoundError) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ message: error.message, field: error.field });
+      }
+
       if (error instanceof FarmerNotFoundError) {
         return res
           .status(HttpStatus.NOT_FOUND)
           .json({ message: error.message, field: error.field });
       }
 
-      if (error instanceof FarmerUpdateError) {
-        return res
-          .status(HttpStatus.BAD_REQUEST)
-          .json({ message: error.message, field: error.field });
-      }
-
-      if (error instanceof FarmerDuplicateDocumentError) {
+      if (error instanceof FarmUpdateError) {
         return res
           .status(HttpStatus.BAD_REQUEST)
           .json({ message: error.message, field: error.field });
@@ -119,17 +113,11 @@ export class FarmerController {
   @Delete('/:id')
   async deleteFarmer(@Param('id') id: string, @Res() res: Response) {
     try {
-      await this.farmarService.deleteFarmer({ id });
+      await this.farmService.deleteFarm({ id });
 
       return res.status(HttpStatus.OK).end();
     } catch (error) {
-      if (error instanceof FarmerNotFoundError) {
-        return res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ message: error.message, field: error.field });
-      }
-
-      if (error instanceof FarmerDeleteError) {
+      if (error instanceof FarmNotFoundError) {
         return res
           .status(HttpStatus.NOT_FOUND)
           .json({ message: error.message, field: error.field });

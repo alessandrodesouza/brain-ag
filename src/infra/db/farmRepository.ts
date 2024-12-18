@@ -1,78 +1,90 @@
 import { Injectable } from '@nestjs/common';
-import { Farmer } from 'src/model/farmer';
+import { Prisma } from '@prisma/client';
+import { Farm } from 'src/model/farm';
 import { IFarmRepository } from 'src/model/repositories/farmRepository';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
-export class FarmerRepository implements IFarmRepository {
+export class FarmRepository implements IFarmRepository {
   constructor(private prisma: PrismaService) {}
 
-  async createFarmer(farmer: Farmer): Promise<string> {
-    const newFarmer = await this.prisma.farmer.create({
+  async createFarm(farm: Farm): Promise<string> {
+    const cropArrayObject = farm.crops as Prisma.JsonArray;
+
+    const newFarm = await this.prisma.farm.create({
       data: {
-        document: farmer.document,
-        name: farmer.name,
+        name: farm.name,
+        city: farm.city,
+        state: farm.state,
+        totalArea: farm.totalArea,
+        cultivableArea: farm.cultivableArea,
+        vegetationArea: farm.vegetationArea,
+        farmer: {
+          connect: { id: farm.farmer.id },
+        },
+        crops: cropArrayObject,
       },
     });
 
-    return newFarmer.id;
+    return newFarm.id;
   }
 
-  async updateFarmer(farmer: Farmer): Promise<void> {
-    await this.prisma.farmer.update({
-      where: { id: farmer.id },
+  async updateFarm(farm: Farm): Promise<void> {
+    await this.prisma.farm.update({
+      where: { id: farm.id },
       data: {
-        document: farmer.document,
-        name: farmer.name,
+        name: farm.name,
+        city: farm.city,
+        state: farm.state,
+        totalArea: farm.totalArea,
+        cultivableArea: farm.cultivableArea,
+        vegetationArea: farm.vegetationArea,
+        farmer: {
+          connect: { id: farm.farmer.id },
+        },
+        crops: farm.crops,
       },
     });
   }
 
-  async getFarmerById(id: string): Promise<Farmer> {
-    const result = await this.prisma.farmer.findUnique({
+  async getFarmById(id: string): Promise<Farm> {
+    const resultFarm = await this.prisma.farm.findUnique({
       where: {
         id,
       },
     });
+    if (!resultFarm) return undefined;
 
-    if (!result) return undefined;
+    const resultFarmer = await this.prisma.farmer.findUnique({
+      where: {
+        id: resultFarm.farmerId,
+      },
+    });
+    if (!resultFarmer) {
+      throw new Error(`Saved farmer ${resultFarm.farmerId} not found`);
+    }
 
-    const farmer = Farmer.parse(result);
+    const farmer = Farm.parse({
+      ...resultFarm,
+      farmer: resultFarmer,
+      crops: resultFarm.crops as any,
+    });
+
     return farmer;
   }
 
-  async getFarmerByDocument(document: string): Promise<Farmer> {
-    const result = await this.prisma.farmer.findUnique({
+  async getTotalFarmsByFarmerId(farmerId: string): Promise<number> {
+    const farms = await this.prisma.farm.findMany({
       where: {
-        document,
+        farmerId,
       },
     });
 
-    if (!result) return undefined;
-
-    const farmer = Farmer.parse(result);
-    return farmer;
+    return farms.length;
   }
 
-  async getOtherFarmerByDocument(
-    id: string,
-    document: string,
-  ): Promise<Farmer> {
-    const result = await this.prisma.farmer.findFirst({
-      where: {
-        document,
-        id: { not: id },
-      },
-    });
-
-    if (!result) return undefined;
-
-    const farmer = Farmer.parse(result);
-    return farmer;
-  }
-
-  async deleteFarmerById(id: string): Promise<void> {
-    await this.prisma.farmer.delete({
+  async deleteFarmById(id: string): Promise<void> {
+    await this.prisma.farm.delete({
       where: {
         id,
       },

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { FarmerRepository } from 'src/infra/db/farmRepository';
+import { FarmerRepository } from 'src/infra/db/farmerRepository';
+import { FarmRepository } from 'src/infra/db/farmRepository';
+import { FarmerDeleteError } from 'src/model/errors/farmerDeleteError';
 import { FarmerDuplicateDocumentError } from 'src/model/errors/farmerDuplicateDocumentError';
 import { FarmerNotFoundError } from 'src/model/errors/farmerNotFoundError';
 import { Farmer } from 'src/model/farmer';
@@ -10,6 +12,7 @@ export class FarmerService {
   constructor(
     private validateDuplicateDocument: ValidateDuplicateDocument,
     private farmerRepository: FarmerRepository,
+    private farmRepository: FarmRepository,
   ) {}
 
   async createFarmer({
@@ -63,6 +66,13 @@ export class FarmerService {
     const farmer = await this.farmerRepository.getFarmerById(id);
     if (!farmer) {
       throw new FarmerNotFoundError({});
+    }
+
+    const totalFarms = await this.farmRepository.getTotalFarmsByFarmerId(id);
+    if (totalFarms > 0) {
+      throw new FarmerDeleteError({
+        message: 'there.are.farms.for.this.farmer',
+      });
     }
 
     await this.farmerRepository.deleteFarmerById(id);
