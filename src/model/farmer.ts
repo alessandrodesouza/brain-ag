@@ -115,6 +115,9 @@ export class Farmer {
   }
 
   public update(params: UpdateParams): void {
+    params.document = params.document || this.document;
+    params.name = params.name || this.name;
+
     const updateParams = { ...this.toJSON(), ...params, updatedAt: new Date() };
     const result = farmer.safeParse(updateParams);
     if (!result.success) {
