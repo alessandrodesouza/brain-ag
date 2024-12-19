@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -66,6 +67,20 @@ export class FarmController {
       }
 
       return res.status(HttpStatus.OK).json(farm.toJSON());
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'internal.server.error' });
+    }
+  }
+
+  @Get('/')
+  async getFarms(@Query('farmer') farmerId: string, @Res() res: Response) {
+    try {
+      const farms = await this.farmService.getFarms(farmerId);
+
+      return res.status(HttpStatus.OK).json(farms);
     } catch (error) {
       console.error(error);
       return res

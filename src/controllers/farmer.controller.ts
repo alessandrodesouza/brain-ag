@@ -76,6 +76,20 @@ export class FarmerController {
     }
   }
 
+  @Get('')
+  async getFarmers(@Res() res: Response) {
+    try {
+      const farmers = await this.farmarService.getFarmers();
+
+      return res.status(HttpStatus.OK).json(farmers);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'internal.server.error' });
+    }
+  }
+
   @Patch('/:id')
   async patchFarmer(
     @Body() params: { document?: string; name?: string },

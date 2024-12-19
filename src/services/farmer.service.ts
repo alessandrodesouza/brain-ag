@@ -6,6 +6,7 @@ import { FarmerDuplicateDocumentError } from '../model/errors/farmerDuplicateDoc
 import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
 import { Farmer } from '../model/farmer';
 import { ValidateDuplicateDocument } from '../model/validateDuplicatedDocument';
+import { FarmerDetails } from '../model/readModel/farmer';
 
 @Injectable()
 export class FarmerService {
@@ -87,5 +88,10 @@ export class FarmerService {
     if (farmerByDocument) return farmerByDocument;
 
     return undefined;
+  }
+
+  async getFarmers(): Promise<FarmerDetails[]> {
+    const farmers = await this.farmerRepository.getFarmers();
+    return farmers;
   }
 }

@@ -6,15 +6,37 @@ import { Farmer } from '../src/model/farmer';
 import { FarmerRepository } from '../src/infra/db/farmerRepository';
 import { FarmRepository } from '../src/infra/db/farmRepository';
 import { AppModule } from '../src/app.module';
+import { CropTypeEnum, Farm } from '../src/model/farm';
 
 describe('Farmer Controller (e2e)', () => {
   let app: INestApplication;
 
   const c = Chance.Chance();
+
   const farmer = Farmer.parse({
     id: c.guid({ version: 4 }),
     name: c.name({ middle: true }),
     document: '29205732095',
+  });
+
+  const farm = Farm.parse({
+    id: c.guid({ version: 4 }),
+    name: 'Fazenda Terra Nossa',
+    city: 'Mogi Guaçu',
+    state: 'sp',
+    totalArea: 10000,
+    vegetationArea: 5000,
+    farmer,
+    crops: [
+      {
+        type: CropTypeEnum.Soy,
+        totalArea: 1000,
+      },
+      {
+        type: CropTypeEnum.Corn,
+        totalArea: 2000,
+      },
+    ],
   });
 
   let farmerRepository: FarmerRepository;
@@ -36,141 +58,196 @@ describe('Farmer Controller (e2e)', () => {
     jest.resetAllMocks();
   });
 
-  it('/farmer/:idOrDocument (GET): ok', () => {
-    jest.spyOn(farmerRepository, 'getFarmerById').mockResolvedValueOnce(farmer);
+  it('/farm/ (GET): ok', () => {
+    const farms: any = [
+      {
+        id: 'b7552e87-7b8c-4deb-a5b6-45621b2d373e',
+        name: 'Fazenda Terra Nossa',
+        city: 'MOGI GUAÇU',
+        state: 'SP',
+        totalArea: 10000,
+        cultivableArea: 3000,
+        vegetationArea: 5000,
+        farmer: {
+          id: '3d19561d-580f-4486-90c1-c7722e344f9e',
+          document: '78414937039',
+          name: 'Alessandro de Souza',
+          createdAt: '2024-12-17T19:03:35.375Z',
+          updatedAt: '2024-12-18T13:35:28.837Z',
+        },
+        crops: [
+          {
+            type: 'soy',
+            totalArea: 1000,
+          },
+          {
+            type: 'corn',
+            totalArea: 2000,
+          },
+        ],
+        createdAt: '2024-12-18T18:01:10.436Z',
+        updatedAt: '2024-12-18T18:01:10.436Z',
+      },
+      {
+        id: 'f4be29ce-009e-43b1-9e17-bae0ca49e512',
+        name: 'Sítio Amanhecer de Manhã',
+        city: 'MOGI MIRIM',
+        state: 'SP',
+        totalArea: 3525,
+        cultivableArea: 1160,
+        vegetationArea: 1200,
+        farmer: {
+          id: 'f8f3055e-3351-44bb-836c-d3260510fa8c',
+          document: '71069667000199',
+          name: 'Fazendeiro SA',
+          createdAt: '2024-12-18T13:53:31.783Z',
+          updatedAt: '2024-12-18T13:53:31.783Z',
+        },
+        crops: [
+          {
+            type: 'soy',
+            totalArea: 535,
+          },
+          {
+            type: 'corn',
+            totalArea: 625,
+          },
+        ],
+        createdAt: '2024-12-19T15:06:27.317Z',
+        updatedAt: '2024-12-19T15:06:27.317Z',
+      },
+    ];
+
+    jest.spyOn(farmRepository, 'getFarms').mockResolvedValueOnce(farms);
 
     return request(app.getHttpServer())
-      .get(`/farmer/${farmer.id}`)
+      .get('/farm/')
       .expect(200)
       .then((res) => {
-        expect(res.body).toEqual(farmer.toJSON());
+        expect(res.body).toEqual(farms);
       });
   });
 
-  it('/farmer/:idOrDocument (GET): not found', () => {
-    jest
-      .spyOn(farmerRepository, 'getFarmerById')
-      .mockResolvedValueOnce(undefined);
-
-    jest
-      .spyOn(farmerRepository, 'getFarmerByDocument')
-      .mockResolvedValueOnce(undefined);
-
-    return request(app.getHttpServer()).get(`/farmer/${farmer.id}`).expect(404);
-  });
-
-  it('/farmer/ (POST): ok', () => {
-    const id = c.guid({ version: 4 });
-    jest
-      .spyOn(farmerRepository, 'getFarmerByDocument')
-      .mockResolvedValueOnce(undefined);
-    jest.spyOn(farmerRepository, 'createFarmer').mockResolvedValueOnce(id);
+  it('/farm/:id (GET): ok', () => {
+    jest.spyOn(farmRepository, 'getFarmById').mockResolvedValueOnce(farm);
 
     return request(app.getHttpServer())
-      .post('/farmer/')
-      .send({ document: farmer.document, name: farmer.name })
+      .get(`/farm/${farm.id}`)
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toEqual(farm.toJSON());
+      });
+  });
+
+  it('/farm/:id (GET): not found', () => {
+    jest.spyOn(farmRepository, 'getFarmById').mockResolvedValueOnce(undefined);
+
+    return request(app.getHttpServer()).get(`/farm/${farmer.id}`).expect(404);
+  });
+
+  it('/farm/ (POST): ok', () => {
+    const id = c.guid({ version: 4 });
+    jest.spyOn(farmerRepository, 'getFarmerById').mockResolvedValueOnce(farmer);
+    jest.spyOn(farmRepository, 'createFarm').mockResolvedValueOnce(id);
+
+    return request(app.getHttpServer())
+      .post('/farm/')
+      .send({
+        name: farm.name,
+        city: farm.city,
+        state: farm.state,
+        totalArea: farm.totalArea,
+        vegetationArea: farm.vegetationArea,
+        farmerId: farmer.id,
+        crops: farm.crops,
+      })
       .expect(201)
       .then((res) => {
         expect(res.body.id).toBe(id);
       });
   });
 
-  it('/farmer/ (POST): bad request', () => {
-    const id = c.guid({ version: 4 });
-    jest
-      .spyOn(farmerRepository, 'getFarmerByDocument')
-      .mockResolvedValueOnce(undefined);
-    jest.spyOn(farmerRepository, 'createFarmer').mockResolvedValueOnce(id);
-
-    return request(app.getHttpServer())
-      .post('/farmer/')
-      .send({ document: '31544514124', name: 123 })
-      .expect(400)
-      .then((res) => {
-        expect(res.body.message).toBe('farmer.invalid.name');
-      });
-  });
-
-  it('/farmer/ (POST): duplicated document', () => {
-    jest
-      .spyOn(farmerRepository, 'getFarmerByDocument')
-      .mockResolvedValueOnce(farmer);
-
-    return request(app.getHttpServer())
-      .post('/farmer/')
-      .send({ document: farmer.document, name: farmer.name })
-      .expect(400)
-      .then((res) => {
-        expect(res.body.message).toBe('farmer.duplicate.document');
-      });
-  });
-
-  it('/farmer/:id (PATCH): ok', () => {
-    const id = c.guid({ version: 4 });
-    jest.spyOn(farmerRepository, 'getFarmerById').mockResolvedValueOnce(farmer);
-    jest
-      .spyOn(farmerRepository, 'getOtherFarmerByDocument')
-      .mockResolvedValueOnce(undefined);
-    jest.spyOn(farmerRepository, 'createFarmer').mockResolvedValueOnce(id);
-    jest
-      .spyOn(farmerRepository, 'updateFarmer')
-      .mockResolvedValueOnce(undefined);
-
-    return request(app.getHttpServer())
-      .patch(`/farmer/${farmer.id}`)
-      .send({ name: 'Nome alterado' })
-      .expect(200);
-  });
-
-  it('/farmer/:id (PATCH): not found', () => {
+  it('/farm/ (POST): farmer not fount', () => {
     jest
       .spyOn(farmerRepository, 'getFarmerById')
       .mockResolvedValueOnce(undefined);
 
     return request(app.getHttpServer())
-      .patch(`/farmer/${farmer.id}`)
-      .send({ name: 'Nome alterado' })
+      .post('/farm/')
+      .send({
+        name: farm.name,
+        city: farm.city,
+        state: farm.state,
+        totalArea: farm.totalArea,
+        vegetationArea: farm.vegetationArea,
+        farmerId: farmer.id,
+        crops: farm.crops,
+      })
       .expect(404)
       .then((res) => {
         expect(res.body.message).toBe('farmer.not.found');
       });
   });
 
-  it('/farmer/:id (DELETE): ok', () => {
+  it('/farm/ (POST): bad request', () => {
     jest.spyOn(farmerRepository, 'getFarmerById').mockResolvedValueOnce(farmer);
-    jest
-      .spyOn(farmRepository, 'getTotalFarmsByFarmerId')
-      .mockResolvedValueOnce(0);
-    jest
-      .spyOn(farmerRepository, 'deleteFarmerById')
-      .mockResolvedValueOnce(undefined);
 
     return request(app.getHttpServer())
-      .delete(`/farmer/${farmer.id}`)
+      .post('/farm/')
+      .send({
+        name: '',
+        city: '',
+        state: '',
+        totalArea: -10000,
+        vegetationArea: -25455,
+        farmerId: {},
+        crops: [],
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body.message).toBe('farm.invalid.name');
+      });
+  });
+
+  it('/farm/:id (PATCH): ok', () => {
+    jest.spyOn(farmRepository, 'getFarmById').mockResolvedValueOnce(farm);
+    jest.spyOn(farmRepository, 'updateFarm').mockResolvedValueOnce(undefined);
+
+    return request(app.getHttpServer())
+      .patch(`/farm/${farm.id}`)
+      .send({ name: 'Nome alterado' })
       .expect(200);
   });
 
-  it('/farmer/:id (DELETE): not found', () => {
-    jest
-      .spyOn(farmerRepository, 'getFarmerById')
-      .mockResolvedValueOnce(undefined);
+  it('/farm/:id (PATCH): not found', () => {
+    jest.spyOn(farmRepository, 'getFarmById').mockResolvedValueOnce(undefined);
 
     return request(app.getHttpServer())
-      .delete(`/farmer/${farmer.id}`)
-      .expect(404);
+      .patch(`/farm/${farm.id}`)
+      .send({ name: 'Nome alterado' })
+      .expect(404)
+      .then((res) => {
+        expect(res.body.message).toBe('farm.not.found');
+      });
   });
 
-  it('/farmer/:id (DELETE): there are farms', () => {
-    jest.spyOn(farmerRepository, 'getFarmerById').mockResolvedValueOnce(farmer);
+  it('/farm/:id (DELETE): ok', () => {
+    jest.spyOn(farmRepository, 'getFarmById').mockResolvedValueOnce(farm);
     jest
-      .spyOn(farmRepository, 'getTotalFarmsByFarmerId')
-      .mockResolvedValueOnce(3);
+      .spyOn(farmRepository, 'deleteFarmById')
+      .mockResolvedValueOnce(undefined);
+
+    return request(app.getHttpServer()).delete(`/farm/${farm.id}`).expect(200);
+  });
+
+  it('/farm/:id (DELETE): not found', () => {
+    jest.spyOn(farmRepository, 'getFarmById').mockResolvedValueOnce(undefined);
 
     return request(app.getHttpServer())
-      .delete(`/farmer/${farmer.id}`)
-      .expect(400)
+      .delete(`/farm/${farm.id}`)
+      .expect(404)
       .then((res) => {
-        expect(res.body.message).toBe('there.are.farms.for.this.farmer');
+        expect(res.body.message).toBe('farm.not.found');
       });
   });
 });

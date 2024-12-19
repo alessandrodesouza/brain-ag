@@ -5,6 +5,7 @@ import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
 import { FarmNotFoundError } from '../model/errors/farmNotFoundError';
 import { Crop, Farm } from '../model/farm';
 import { Farmer } from '../model/farmer';
+import { FarmDetails } from '../model/readModel/farm';
 
 export type CreateFarmParams = {
   name: string;
@@ -71,6 +72,11 @@ export class FarmService {
     if (farmById) return farmById;
 
     return undefined;
+  }
+
+  async getFarms(farmerId?: string): Promise<FarmDetails[]> {
+    const farms = await this.farmRepository.getFarms(farmerId);
+    return farms;
   }
 
   async deleteFarm({ id }: { id: string }): Promise<void> {

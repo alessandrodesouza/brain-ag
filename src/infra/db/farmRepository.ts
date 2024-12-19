@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { Farm } from '../../model/farm';
 import { IFarmRepository } from '../../model/repositories/farmRepository';
 import { PrismaService } from '../../prisma.service';
+import { FarmDetails } from 'src/model/readModel/farm';
 
 @Injectable()
 export class FarmRepository implements IFarmRepository {
@@ -89,5 +90,40 @@ export class FarmRepository implements IFarmRepository {
         id,
       },
     });
+  }
+
+  async getFarms(farmerId?: string): Promise<FarmDetails[]> {
+    const whereObject = farmerId ? { farmerId } : {};
+    // const farms: any = this.prisma.farm.findMany({
+    //   where: whereObject,
+    //   orderBy: {
+    //     name: 'asc',
+    //   },
+    //   include: {
+    //     farmer: true,
+    //   },
+    // });
+    const farms: any = this.prisma.farm.findMany({
+      select: {
+        id: true,
+        name: true,
+        city: true,
+        state: true,
+        totalArea: true,
+        cultivableArea: true,
+        vegetationArea: true,
+        farmerId: false,
+        farmer: true,
+        crops: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: whereObject,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return farms;
   }
 }

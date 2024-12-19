@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Farmer } from '../../model/farmer';
 import { IFarmerRepository } from '../../model/repositories/farmerRepository';
 import { PrismaService } from '../../prisma.service';
+import { FarmerDetails } from '../../model/readModel/farmer';
 
 @Injectable()
 export class FarmerRepository implements IFarmerRepository {
@@ -77,5 +78,15 @@ export class FarmerRepository implements IFarmerRepository {
         id,
       },
     });
+  }
+
+  async getFarmers(): Promise<FarmerDetails[]> {
+    const farmers = this.prisma.farmer.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return farmers;
   }
 }
