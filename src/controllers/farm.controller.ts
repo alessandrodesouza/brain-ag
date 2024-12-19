@@ -144,4 +144,18 @@ export class FarmController {
         .json({ message: 'internal.server.error' });
     }
   }
+
+  @Get('/dashboard/totalizers')
+  async getTotalizers(@Res() res: Response) {
+    try {
+      const totalizers = await this.farmService.getTotalizers();
+
+      return res.status(HttpStatus.OK).json(totalizers);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'internal.server.error' });
+    }
+  }
 }

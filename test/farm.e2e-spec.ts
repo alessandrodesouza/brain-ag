@@ -7,6 +7,10 @@ import { FarmerRepository } from '../src/infra/db/farmerRepository';
 import { FarmRepository } from '../src/infra/db/farmRepository';
 import { AppModule } from '../src/app.module';
 import { CropTypeEnum, Farm } from '../src/model/farm';
+import { PrismaService } from '../src/prisma.service';
+
+jest.mock('../src/prisma.service');
+jest.mocked(PrismaService);
 
 describe('Farmer Controller (e2e)', () => {
   let app: INestApplication;
@@ -248,6 +252,34 @@ describe('Farmer Controller (e2e)', () => {
       .expect(404)
       .then((res) => {
         expect(res.body.message).toBe('farm.not.found');
+      });
+  });
+
+  it('/farm/dashboard/totalizers (GET): ok', () => {
+    const totalizer = {
+      numberOfFarms: 2,
+      totalArea: 13525,
+      totalCultivableArea: 4160,
+      totalVegetationArea: 6200,
+      totalCultivableAreaByState: {
+        SP: 4160,
+      },
+      totalCultivableAreaByCrop: {
+        soy: 1000,
+        corn: 2625,
+        cofee: 535,
+      },
+    };
+
+    jest
+      .spyOn(farmRepository, 'getTotalizers')
+      .mockResolvedValueOnce(totalizer);
+
+    return request(app.getHttpServer())
+      .get('/farm/dashboard/totalizers')
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toEqual(totalizer);
       });
   });
 });

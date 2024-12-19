@@ -14,3 +14,12 @@ export interface FarmDetails {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface FarmTotalizers {
+  numberOfFarms: number;
+  totalArea: number;
+  totalCultivableArea: number;
+  totalVegetationArea: number;
+  totalCultivableAreaByState: Record<string, number>;
+  totalCultivableAreaByCrop: Record<string, number>;
+}

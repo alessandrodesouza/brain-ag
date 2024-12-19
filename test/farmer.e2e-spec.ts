@@ -6,6 +6,10 @@ import { Farmer } from '../src/model/farmer';
 import { FarmerRepository } from '../src/infra/db/farmerRepository';
 import { FarmRepository } from '../src/infra/db/farmRepository';
 import { AppModule } from '../src/app.module';
+import { PrismaService } from '../src/prisma.service';
+
+jest.mock('../src/prisma.service');
+jest.mocked(PrismaService);
 
 describe('Farmer Controller (e2e)', () => {
   let app: INestApplication;

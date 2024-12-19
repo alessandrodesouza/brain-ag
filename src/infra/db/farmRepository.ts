@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Farm } from '../../model/farm';
+import { Crop, Farm } from '../../model/farm';
 import { IFarmRepository } from '../../model/repositories/farmRepository';
 import { PrismaService } from '../../prisma.service';
-import { FarmDetails } from 'src/model/readModel/farm';
+import { FarmTotalizers, FarmDetails } from 'src/model/readModel/farm';
 
 @Injectable()
 export class FarmRepository implements IFarmRepository {
@@ -94,16 +94,7 @@ export class FarmRepository implements IFarmRepository {
 
   async getFarms(farmerId?: string): Promise<FarmDetails[]> {
     const whereObject = farmerId ? { farmerId } : {};
-    // const farms: any = this.prisma.farm.findMany({
-    //   where: whereObject,
-    //   orderBy: {
-    //     name: 'asc',
-    //   },
-    //   include: {
-    //     farmer: true,
-    //   },
-    // });
-    const farms: any = this.prisma.farm.findMany({
+    const farms: any = await this.prisma.farm.findMany({
       select: {
         id: true,
         name: true,
@@ -125,5 +116,47 @@ export class FarmRepository implements IFarmRepository {
     });
 
     return farms;
+  }
+
+  async getTotalizers(): Promise<FarmTotalizers> {
+    const farms = await this.prisma.farm.findMany({
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    const totalizer = {
+      numberOfFarms: 0,
+      totalArea: 0,
+      totalCultivableArea: 0,
+      totalVegetationArea: 0,
+      totalCultivableAreaByState: {},
+      totalCultivableAreaByCrop: {},
+    };
+
+    farms.reduce((t, farm) => {
+      t.numberOfFarms += 1;
+      t.totalArea += farm.totalArea;
+      t.totalCultivableArea += farm.cultivableArea;
+      t.totalVegetationArea += farm.vegetationArea;
+
+      t.totalCultivableAreaByState[farm.state] = t.totalCultivableAreaByState[
+        farm.state
+      ]
+        ? t.totalCultivableAreaByState[farm.state] + farm.cultivableArea
+        : farm.cultivableArea;
+
+      (farm.crops as any).forEach((c: Crop) => {
+        t.totalCultivableAreaByCrop[c.type] = t.totalCultivableAreaByCrop[
+          c.type
+        ]
+          ? t.totalCultivableAreaByCrop[c.type] + c.totalArea
+          : c.totalArea;
+      });
+
+      return t;
+    }, totalizer);
+
+    return totalizer;
   }
 }

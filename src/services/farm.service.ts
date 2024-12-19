@@ -5,7 +5,7 @@ import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
 import { FarmNotFoundError } from '../model/errors/farmNotFoundError';
 import { Crop, Farm } from '../model/farm';
 import { Farmer } from '../model/farmer';
-import { FarmDetails } from '../model/readModel/farm';
+import { FarmDetails, FarmTotalizers } from '../model/readModel/farm';
 
 export type CreateFarmParams = {
   name: string;
@@ -86,5 +86,10 @@ export class FarmService {
     }
 
     await this.farmRepository.deleteFarmById(id);
+  }
+
+  async getTotalizers(): Promise<FarmTotalizers> {
+    const totalizers = await this.farmRepository.getTotalizers();
+    return totalizers;
   }
 }

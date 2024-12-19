@@ -1,5 +1,5 @@
 import { Farm } from '../farm';
-import { FarmDetails } from '../readModel/farm';
+import { FarmTotalizers, FarmDetails } from '../readModel/farm';
 
 export interface IFarmRepository {
   createFarm(farm: Farm): Promise<string>;
@@ -7,4 +7,5 @@ export interface IFarmRepository {
   getFarms(farmerId?: string): Promise<FarmDetails[]>;
   getTotalFarmsByFarmerId(farmerId: string): Promise<number>;
   deleteFarmById(id: string): Promise<void>;
+  getTotalizers(): Promise<FarmTotalizers>;
 }
