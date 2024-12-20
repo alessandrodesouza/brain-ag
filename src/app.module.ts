@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FarmerService } from './services/farmer.service';
@@ -9,6 +9,7 @@ import { ValidateDuplicateDocument } from './model/validateDuplicatedDocument';
 import { FarmService } from './services/farm.service';
 import { FarmRepository } from './infra/db/farmRepository';
 import { FarmController } from './controllers/farm.controller';
+import { LoggerMiddleware } from './controllers/middlewares/logger.middleware';
 
 @Module({
   imports: [],
@@ -23,4 +24,8 @@ import { FarmController } from './controllers/farm.controller';
     ValidateDuplicateDocument,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

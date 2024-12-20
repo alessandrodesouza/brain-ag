@@ -16,16 +16,33 @@ import { FarmerDuplicateDocumentError } from '../model/errors/farmerDuplicateDoc
 import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
 import { FarmerUpdateError } from '../model/errors/farmerUpdateError';
 import { FarmerService } from '../services/farmer.service';
+import { CreateFarmerDto } from './types/create.farmer.dto';
+import { CreateFarmerResultDto } from './types/create.farmer.result.dto';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { FarmerDto } from './types/farmer.dto';
+import { UpdateFarmerDto } from './types/update.farmer.dto';
 
 @Controller('farmer')
 export class FarmerController {
   constructor(private readonly farmarService: FarmerService) {}
 
   @Post()
+  @ApiCreatedResponse({
+    description: 'Create a Farmer',
+    type: CreateFarmerResultDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+  })
   async postFarmer(
-    @Body() params: { document: string; name: string },
+    @Body() params: CreateFarmerDto,
     @Res() res: Response,
-  ) {
+  ): Promise<Response<CreateFarmerResultDto>> {
     try {
       const id = await this.farmarService.createFarmer({
         document: params.document,
@@ -54,10 +71,17 @@ export class FarmerController {
   }
 
   @Get('/:idOrDocument')
+  @ApiOkResponse({
+    description: 'Get a Farmer',
+    type: FarmerDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Farmer not found',
+  })
   async getFarmer(
     @Param('idOrDocument') idOrDocument: string,
     @Res() res: Response,
-  ) {
+  ): Promise<Response<FarmerDto>> {
     try {
       const farmer = await this.farmarService.getFarmer({
         idOrDocument: idOrDocument,
@@ -76,8 +100,13 @@ export class FarmerController {
     }
   }
 
-  @Get('')
-  async getFarmers(@Res() res: Response) {
+  @Get('/')
+  @ApiOkResponse({
+    description: 'Get Farmer list',
+    type: FarmerDto,
+    isArray: true,
+  })
+  async getFarmers(@Res() res: Response): Promise<Response<Array<FarmerDto>>> {
     try {
       const farmers = await this.farmarService.getFarmers();
 
@@ -91,11 +120,20 @@ export class FarmerController {
   }
 
   @Patch('/:id')
+  @ApiOkResponse({
+    description: 'Update a Farmer',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+  })
+  @ApiNotFoundResponse({
+    description: 'Farmer not found',
+  })
   async patchFarmer(
-    @Body() params: { document?: string; name?: string },
+    @Body() params: UpdateFarmerDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ) {
+  ): Promise<Response> {
     try {
       await this.farmarService.updateFarmer({
         id,
@@ -131,7 +169,16 @@ export class FarmerController {
   }
 
   @Delete('/:id')
-  async deleteFarmer(@Param('id') id: string, @Res() res: Response) {
+  @ApiOkResponse({
+    description: 'Delete a Farmer',
+  })
+  @ApiNotFoundResponse({
+    description: 'Farmer not found',
+  })
+  async deleteFarmer(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<Response> {
     try {
       await this.farmarService.deleteFarmer({ id });
 

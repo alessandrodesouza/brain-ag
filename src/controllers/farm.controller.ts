@@ -15,14 +15,32 @@ import { FarmCreateError } from '../model/errors/farmCreateError';
 import { FarmerNotFoundError } from '../model/errors/farmerNotFoundError';
 import { FarmNotFoundError } from '../model/errors/farmNotFoundError';
 import { FarmUpdateError } from '../model/errors/farmUpdateError';
-import { CreateFarmParams, FarmService } from '../services/farm.service';
+import { FarmService } from '../services/farm.service';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { CreateFarmResultDto } from './types/create.farm.result.dto';
+import { CreateFarmDto } from './types/create.farm.dto';
+import { FarmDto } from './types/farm.dto';
+import { UpdateFarmDto } from './types/update.farm.dto';
 
 @Controller('farm')
 export class FarmController {
   constructor(private readonly farmService: FarmService) {}
 
   @Post()
-  async postFarm(@Body() params: CreateFarmParams, @Res() res: Response) {
+  @Post()
+  @ApiCreatedResponse({
+    description: 'Create a Farm',
+    type: CreateFarmResultDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+  })
+  async postFarm(@Body() params: CreateFarmDto, @Res() res: Response) {
     try {
       const id = await this.farmService.createFarm({
         name: params.name,
@@ -56,7 +74,17 @@ export class FarmController {
   }
 
   @Get('/:id')
-  async getFarm(@Param('id') id: string, @Res() res: Response) {
+  @ApiOkResponse({
+    description: 'Get a Farm',
+    type: FarmDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Farm not found',
+  })
+  async getFarm(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<Response<FarmDto>> {
     try {
       const farm = await this.farmService.getFarm({
         id,
@@ -76,7 +104,15 @@ export class FarmController {
   }
 
   @Get('/')
-  async getFarms(@Query('farmer') farmerId: string, @Res() res: Response) {
+  @ApiOkResponse({
+    description: 'Get Farm list',
+    type: FarmDto,
+    isArray: true,
+  })
+  async getFarms(
+    @Query('farmer') farmerId: string,
+    @Res() res: Response,
+  ): Promise<Response<Array<FarmDto>>> {
     try {
       const farms = await this.farmService.getFarms(farmerId);
 
@@ -90,11 +126,20 @@ export class FarmController {
   }
 
   @Patch('/:id')
+  @ApiOkResponse({
+    description: 'Update a Farm',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+  })
+  @ApiNotFoundResponse({
+    description: 'Farm not found',
+  })
   async patchFarmer(
-    @Body() params: { document?: string; name?: string },
+    @Body() params: UpdateFarmDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ) {
+  ): Promise<Response> {
     try {
       await this.farmService.updateFarm({ ...params, id });
 
@@ -126,6 +171,12 @@ export class FarmController {
   }
 
   @Delete('/:id')
+  @ApiOkResponse({
+    description: 'Delete a Farm',
+  })
+  @ApiNotFoundResponse({
+    description: 'Farm not found',
+  })
   async deleteFarmer(@Param('id') id: string, @Res() res: Response) {
     try {
       await this.farmService.deleteFarm({ id });
@@ -146,6 +197,24 @@ export class FarmController {
   }
 
   @Get('/dashboard/totalizers')
+  @ApiOkResponse({
+    description: 'Totalizers to dashboard',
+    example: {
+      numberOfFarms: 3,
+      totalArea: 15000,
+      totalCultivableArea: 4900,
+      totalVegetationArea: 6000,
+      totalCultivableAreaByState: {
+        SP: 4200,
+        MG: 700,
+      },
+      totalCultivableAreaByCrop: {
+        soy: 1800,
+        corn: 2500,
+        coffee: 600,
+      },
+    },
+  })
   async getTotalizers(@Res() res: Response) {
     try {
       const totalizers = await this.farmService.getTotalizers();
